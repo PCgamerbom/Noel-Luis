@@ -1,0 +1,225 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: roblox
+    description: Public Roblox portfolio data
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /presence:
+    get:
+      operationId: getRobloxPresence
+      tags: [roblox]
+      summary: Get current presence for portfolio profiles
+      responses:
+        "200":
+          description: Current presence states
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PresenceResponse"
+        "502":
+          description: Roblox presence service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /profiles:
+    get:
+      operationId: getRobloxProfiles
+      tags: [roblox]
+      summary: Get public profiles and avatar thumbnails
+      responses:
+        "200":
+          description: Public profile information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfilesResponse"
+        "502":
+          description: Roblox profile service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /communities:
+    get:
+      operationId: getRobloxCommunities
+      tags: [roblox]
+      summary: Get public community information
+      responses:
+        "200":
+          description: Public community information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunitiesResponse"
+        "502":
+          description: Roblox community service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /products:
+    get:
+      operationId: getRobloxProducts
+      tags: [roblox]
+      summary: Get currently available community store items
+      responses:
+        "200":
+          description: Real catalog items or an explicit unavailable state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductsResponse"
+        "502":
+          description: Roblox catalog service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    PresenceResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/RobloxPresence"
+        updatedAt:
+          type: string
+          format: date-time
+      required: [items, updatedAt]
+    RobloxPresence:
+      type: object
+      properties:
+        userId:
+          type: integer
+        username:
+          type: string
+        status:
+          type: string
+          enum: [online, offline, in_game, in_studio, unavailable]
+        experienceName:
+          type: [string, "null"]
+        lastLocation:
+          type: [string, "null"]
+      required: [userId, username, status, experienceName, lastLocation]
+    ProfilesResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/RobloxProfile"
+      required: [items]
+    RobloxProfile:
+      type: object
+      properties:
+        userId:
+          type: integer
+        username:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        created:
+          type: string
+        avatarUrl:
+          type: [string, "null"]
+        profileUrl:
+          type: string
+      required: [userId, username, displayName, description, created, avatarUrl, profileUrl]
+    CommunitiesResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/RobloxCommunity"
+      required: [items]
+    RobloxCommunity:
+      type: object
+      properties:
+        communityId:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        memberCount:
+          type: integer
+        iconUrl:
+          type: [string, "null"]
+        communityUrl:
+          type: string
+        storeUrl:
+          type: string
+      required: [communityId, name, description, memberCount, iconUrl, communityUrl, storeUrl]
+    ProductsResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/RobloxProduct"
+        available:
+          type: boolean
+        updatedAt:
+          type: string
+          format: date-time
+      required: [items, available, updatedAt]
+    RobloxProduct:
+      type: object
+      properties:
+        productId:
+          type: integer
+        name:
+          type: string
+        price:
+          type: [integer, "null"]
+        imageUrl:
+          type: [string, "null"]
+        productUrl:
+          type: string
+        communityId:
+          type: integer
+        communityName:
+          type: string
+      required: [productId, name, price, imageUrl, productUrl, communityId, communityName]
+

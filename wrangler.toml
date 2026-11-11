@@ -1,0 +1,3 @@
+name = "roblox-portfolio"
+pages_build_output_dir = "artifacts/roblox-portfolio/dist/public"
+compatibility_date = "2026-11-11"
